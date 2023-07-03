@@ -7,8 +7,8 @@ create table Pacientes (
     nome varchar(100),
     email varchar(255),
     idade integer,
-    createdAt DATE,
-    updatedAt DATE
+    created_At DATE,
+    updated_At DATE
 );
 
 create table Psicologos(
@@ -19,8 +19,8 @@ create table Psicologos(
     password varchar(50),
     password_hash varchar(200),
     apresentacao varchar(255),
-    createdAt DATE,
-    updatedAt DATE    
+    created_At DATE,
+    updated_At DATE    
 );
 
 create table Atendimentos (

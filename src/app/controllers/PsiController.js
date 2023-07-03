@@ -4,7 +4,7 @@ class PsiController {
     async store(req, res){
         const {id, name, email, crp} = await Psicologos.create(req.body)
 
-        return response.json({
+        return res.json({
             id, 
             name,
             email, 
