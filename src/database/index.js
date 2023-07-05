@@ -1,20 +1,27 @@
 import Sequelize from 'sequelize';
-import Psicologos from '../app/models/Psicologos.js';
 import databaseConfig from '../config/database.js'
 
-const models = [Psicologos]
+let db = {}
 
-class Database {
-    constructor() {
-        this.init()
+try {
+    db = new Sequelize(databaseConfig)
+} catch (error) {
+    console.log(error)
+}
+
+async function hasConnection(){
+    try {
+        await db.authenticate()
+        console.log("BD Conectado")
         
-    }
-    init() {
-        this.connection = new Sequelize(databaseConfig)
-
-        models.map(model => model.init(this.connection))
+    } catch (error) {
+        console.log(error)
         
     }
 }
 
-export default new Database()
+Object.assign(db, {
+    hasConnection
+})
+
+export default db;

@@ -1,22 +1,15 @@
 import express from 'express';
 import routes from './routes.js';
-import './database/index.js'
+import db from './database/index.js';
 
-class App {
-    constructor() {
-        this.server = express()
 
-        this.middlewares()
-        this.routes()
-    }
+const app = express()
 
-    middlewares() {
-        this.server.use(express.json())
-    }
+db.hasConnection()
 
-    routes() {
-        this.server.use(routes)
-    }
-}
+app.use(express.json())
 
-export default new App().server;
+app.use(routes)
+
+
+export default app
