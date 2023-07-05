@@ -1,16 +1,39 @@
 import Psicologos from "../models/Psicologos.js";
+import bcrypt from "bcrypt";
+
 
 class PsiController {
-    async store(req, res){
-        const {id, name, email, crp} = await Psicologos.create(req.body)
+    async cadastrarPsi(req, res){
+        const {id, nome, email, crp, apresentacao} = await Psicologos.create(req.body)
 
-        return res.json({
+        const psiExists = Psicologos.findOne({where: {email: req.body.email}})
+
+        if (psiExists) {
+            return res.status(400).json({error: "Psicologo ja cadastrado!"})
+        }
+
+        return res.json(console.log("Psicologo cadastrado com sucesso!"),{
             id, 
-            name,
-            email, 
-            crp
+            nome,
+            email,
+            crp,
+            apresentacao,
+          
         })
     }
+
+    async login(req,res) {
+        const {email, password} = await Psicologos.verify(req.body)
+
+        if(!email || !password) {
+            return res.status(401).json({ message: "E-mail ou senha inválidos, verifique e tente novamente" })
+        } 
+
+        return res.status(401).json({message: 'E-mail ou senha inválido, verifique e tente novamente'})      
+
+
+    }
+
 }
 
 export default new PsiController()
