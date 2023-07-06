@@ -1,6 +1,6 @@
 import { Sequelize, Model, DataTypes } from "sequelize";
 import db from "../../database/index.js";
-import bcrypt from "bcrypt";
+
 
 const Psicologos = db.define(
   "Psicologos",
@@ -18,15 +18,6 @@ const Psicologos = db.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notNull: { args: true, msg: 'password can\'t be empty' }, 
-        len: { args: 6, msg: "Senha deve conter mais que 6 caracteres.",
-        },
-      },
-    },
     password_hash: {
       type: DataTypes.STRING,
     },
@@ -42,45 +33,21 @@ const Psicologos = db.define(
     apresentacao: {
       type: DataTypes.STRING,
     },
-    created_At: {
+    createdAt: {
       type: DataTypes.DATE,
+      field: "created_At",
     },
-    updated_At: {
+
+    updatedAt: {
       type: DataTypes.DATE,
+      field: "updated_At",
     },
   },
   {
     tableName: "psicologos",
+    timestamps: true,
+    underscored: true,
   }
 );
 
-Psicologos.addHook("beforeSave", async (Psicologos) => {
-  if (Psicologos.password) {
-    Psicologos.password_hash = await bcrypt.hash(Psicologos.password, 6);
-  }
-  return;
-});
-
 export default Psicologos;
-
-// class Psicologos extends Model {
-//     static init (Sequelize){
-//         super.init({
-//             nome: DataTypes.STRING,
-//             email: DataTypes.STRING,
-//             password: DataTypes.VIRTUAL,
-//             password_hash: DataTypes.STRING,
-//             apresentacao: DataTypes.STRING
-//         },{
-//             Sequelize,
-//         }
-//         )
-
-//         // this.addHook('beforeSave', async (Psicologos) => {
-//         //     if(Psicologos.password) {
-//         //         Psicologos.password_hash = await bcrypt.hash(Psicologos.password, 6)
-//         //     }
-//         //     return this
-//         // })
-//     }
-// }

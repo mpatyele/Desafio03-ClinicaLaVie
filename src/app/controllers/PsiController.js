@@ -1,35 +1,47 @@
+import { Sequelize } from "sequelize";
 import Psicologos from "../models/Psicologos.js";
-import bcrypt from "bcrypt";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken'
+import secret from "../../config/secret.js";
+
 
 
 class PsiController {
     async cadastrarPsi(req, res){
-        const {id, nome, email, crp, apresentacao} = await Psicologos.create(req.body)
-
-        const psiExists = Psicologos.findOne({where: {email: req.body.email}})
+        const psiExists = await Psicologos.findOne({where: {email: req.body.email}})
 
         if (psiExists) {
             return res.status(400).json({error: "Psicologo ja cadastrado!"})
-        }
+        } 
 
-        return res.json(console.log("Psicologo cadastrado com sucesso!"),{
-            id, 
-            nome,
-            email,
-            crp,
-            apresentacao,
-          
-        })
+        const newPassword = bcrypt.hashSync(req.body.password, 6);
+
+        const newPsi = await Psicologos.create({nome: req.body.nome, email: req.body.email, password_hash: newPassword});
+
+        return res.status(201).json({newPsi})
+        
+    
     }
 
     async login(req,res) {
-        const {email, password} = await Psicologos.verify(req.body)
+        const psiExists = await Psicologos.findOne({where: {email: req.body.email}})
 
-        if(!email || !password) {
-            return res.status(401).json({ message: "E-mail ou senha inválidos, verifique e tente novamente" })
-        } 
+        if (!psiExists) {
+            return res.status(400).json({error: "Psicologo inexistente!"})
+        }   
+        const {email, password} =  (req.body)
 
-        return res.status(401).json({message: 'E-mail ou senha inválido, verifique e tente novamente'})      
+        if (!bcrypt.compareSync(password, psiExists.password_hash)) {
+            return res.status(401).json({message: "Senha invalida!"});
+          }        
+
+        const token = jwt.sign( {
+            id: psiExists.id,
+            email: psiExists.email,
+            nome: psiExists.nome
+        }, secret.key
+        )
+        return res.status(200).json({token}) 
 
 
     }
