@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken'
 
 export class AuthController{
-    login(req, res) {
-        const { body: {password, email}} =req;
+    async login(req, res) {
+        const { body: {password, email}} = req.body;
 
         const secretKey = 'secret'
 
