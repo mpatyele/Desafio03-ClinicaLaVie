@@ -23,14 +23,12 @@ create table Psicologos(
 );
 
 create table Atendimentos (
-	IdConsulta int  auto_increment primary key,
-    paciente_id int,
-    idPsicologo integer(8),
-    numProntuario varchar(50),
-    data_atendimento date,
-    observacao varchar(255),
-    created_At DATE,
-    updated_At DATE, 
-	FOREIGN KEY (idPaciente) REFERENCES Pacientes(id),    
-    FOREIGN KEY (idPsicologo) REFERENCES Psicologos(id)
+	idConsulta int auto_increment primary key not null,
+    id_psicologo INTEGER NOT NULL,
+    id_paciente INTEGER NOT NULL,
+    data_atendimento DATETIME,
+    observacao VARCHAR(255),
+    CONSTRAINT psicologos FOREIGN KEY (id_psicologo) REFERENCES psicologos(id),
+	CONSTRAINT pacientes FOREIGN KEY (id_paciente) REFERENCES pacientes(id)
+
 );

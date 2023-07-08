@@ -33,6 +33,7 @@ const PacienteController = {
   
   listarPacientes: async (req, res) => {
     const listaDePacientes = await Pacientes.findAll({});
+   
     res.json(listaDePacientes);
   },
 
@@ -97,7 +98,9 @@ const PacienteController = {
       return res
         .status(404)
         .json({ message: "Erro na requisição. Paciente não encontrado!" });
-    }
+    } 
+    
+
 
     await Pacientes.destroy({
       where: {
