@@ -1,27 +1,41 @@
 import { Sequelize, Model, DataTypes } from 'sequelize';
 import db from "../../database/index.js";
+import Psicologos from '../models/Psicologos.js';
+import Pacientes from '../models/Pacientes.js';
 
 const Atendimentos = db.define("Atendimentos", {
         idConsulta: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
+            field: "idConsulta"
         },
-        idPaciente: {
-            type: DataTypes.INTEGER,
+        Paciente_id: {          
+            type: DataTypes.INTEGER,                        
             references: {
                 model: Pacientes,
                 key: "id",
-            }                
+            },
+            field: "id_paciente",
+            
+                        
         },
         idPsicologo: {
             type: DataTypes.INTEGER(8),
             references: {
                 model: Psicologos,
                 key: "id",
-            }
+            },
+            
         },
         numProntuario: {
+            type: DataTypes.STRING,
+        },
+        data_atendimento: {
+            type: DataTypes.DATE,
+            allowNull: false,
+        },
+        observacao: {
             type: DataTypes.STRING,
             allowNull: false,
         },
