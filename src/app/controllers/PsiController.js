@@ -3,8 +3,38 @@ import Psicologos from "../models/Psicologos.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import secret from "../../config/secret.js";
+import errors from "../../core/errors/errors.js";
+import { validate, Joi } from "express-validation"
+import middlewaresPsicologos from "../../middlewares/middlewarePsicologos.js"
 
 class PsiController {
+  //GET
+  async listarPsicologos(req, res) {
+    const listaDePsicologos = await Psicologos.findAll({});
+    if (listaDePsicologos.length === 0) {
+      return res.status(200).json({});
+    }
+    return res.status(200).json(listaDePsicologos);
+  }
+
+  //GET por ID
+  async listarPsicologoId(req, res) {
+    const { id } = req.params;
+
+    const psicologo = await Psicologos.findByPk(id, {
+      attributes: {
+        exclude: ["password_hash"],
+      },
+    });
+
+    if (!psicologo) {
+      return res.status(404).json(errors.id_nao_encontrada);
+    }
+
+    return res.status(200).json(psicologo);
+  }
+
+  //POST
   async cadastrarPsi(req, res) {
     const psiExists = await Psicologos.findOne({
       where: { email: req.body.email },
@@ -27,69 +57,28 @@ class PsiController {
     return res.status(201).json({ newPsi });
   }
 
-  async login(req, res) {
-    const psiExists = await Psicologos.findOne({
-      where: { email: req.body.email },
-    });
-
-    if (!psiExists) {
-      return res.status(400).json({ error: "Psicologo inexistente!" });
-    }
-
-    const { email, password } = req.body;
-
-    if (!bcrypt.compareSync(password, psiExists.password_hash)) {
-      return res.status(401).json({
-        message: "E-mail ou senha inválido, verifique e tente novamente",
-      });
-    }
-
-    const token = jwt.sign(
-      {
-        id: psiExists.id,
-        email: psiExists.email,
-        nome: psiExists.nome,
-      },
-      secret.key
-    );
-    return res.status(200).json({ token });
-  }
-
-  async listarPsicologos(req, res) {
-    const listaDePsicologos = await Psicologos.findAll({});
-    return res.status(200).json(listaDePsicologos);
-  }
-
-  async listarPsicologoId(req, res) {
-    const { id } = req.params;
-
-    const psicologo = await Psicologos.findByPk(id, {
-      attributes: {
-        exclude: ["password_hash"],
-      },
-    });
-
-    if (psicologo == null) {
-      return res.status(401).json({ message: "id invalido!" });
-    }
-
-    return res.status(200).json(psicologo);
-  }
-
+  //PUT
   async atualizarPsicologoId(req, res) {
     const { id } = req.params;
-    const { nome, email, password, apresentacao } = req.params;
-    let atualizarPsicologo = await Psicologos.findByPk(id);
+    const { nome, email, password, apresentacao} = req.body;
+
+    const atualizarPsicologo = await Psicologos.findByPk(id);
 
     if (!atualizarPsicologo) {
-      return res.status(401).json({ message: "id invalido!" });
+      return res.status(400).json(errors.id_nao_encontrada);
+    } 
+
+    if (!nome || !email || !password || !apresentacao) {
+      return res.status(400).json(errors.id_nao_encontrada);
+
     }
 
-    if ((!nome, !email, !password, !apresentacao)) {
-      return res.status(400).json({ error: "Erro na requisicao!" });
-    }
+    if(password.length < 6) {
+      return res.status(400).json({message:"Erro na requisicao"})
+    }   
+  
 
-    const newPassword = bcrypt.hashSync(req.body.password, 6);
+    const newPassword = password ? bcrypt.hashSync(req.body.password, 6) : null;
     const psiAtualizado = await Psicologos.update(
       {
         nome: req.body.nome,
@@ -105,32 +94,28 @@ class PsiController {
       }
     );
 
-    return res.status(200).json({
-      nome: req.body.nome,
-      email: req.body.email,
-      password_hash: newPassword,
-      apresentacao: req.body.apresentacao,
-      crp: req.body.crp,
-    });
+    return res.status(200).json(await Psicologos.findByPk(id));
   }
 
+  
+
+  //DELETE
   async deletarPsicologo(req, res) {
     const { id } = req.params;
 
     const psicologo = await Psicologos.findByPk(id);
 
     if (!psicologo) {
-      return res
-        .status(404)
-        .json({ message: "Erro na requisição. Id não encontrado!" });
+      return res.status(404).json(errors.id_nao_encontrada);
     }
 
     await Psicologos.destroy({
       where: {
         id,
       },
+    }).then(() => {
+      res.status(204).end();
     });
-    return res.status(200).json({ message: "Psicologo deletado" }); //status 204 nao permite mensagem no body
   }
 }
 

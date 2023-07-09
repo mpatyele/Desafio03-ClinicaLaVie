@@ -1,15 +1,19 @@
-import errors from '../core/errors/errors.js';
+import {validate, Joi} from 'express-validation';
 
-export const validate = (req, res, next) => {
-  const { body: { name, email } } = req;
+const validatePost = validate({
+  body: Joi.object({
+      id_paciente: Joi.number().integer().required(),
+      data_atendimento: Joi.date().iso().required(), 
+      observacao: Joi.string().min(6).max(250).required(),
+      id_psicologo: Joi.number().integer().optional(),
+    })
+  });
 
-  if (!name || !email) {
-    return res.status(400).json({ message: errors.EMAIL_OR_NAME_EMPTY })
+
+const middlewaresAtendimentos = {
+  postAtendimento: async (req, res, next) => { 
+    await validatePost(req, res, next);  
   }
+};
 
-  if (name.length > 50)  {
-    return res.status(400).json({ message: errors.NAME_LIMIT_CHARACTER })
-  }
-
-  next();
-}
+  export default middlewaresAtendimentos;

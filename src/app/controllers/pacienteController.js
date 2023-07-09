@@ -1,8 +1,34 @@
 import { Sequelize } from "sequelize";
 import express from "express";
 import Pacientes from "../models/Pacientes.js";
+import errors from "../../core/errors/errors.js";
 
 const PacienteController = {
+  //GET
+  listarPacientes: async (req, res) => {
+    const listaDePacientes = await Pacientes.findAll({});
+    if (!listaDePacientes) {
+      return res.status(200).json({});
+    }
+    res.status(200).json(listaDePacientes);
+  },
+
+
+  //GET POR ID
+  listarPacienteId: async (req, res) => {
+    const { id } = req.params;
+
+    const paciente = await Pacientes.findByPk(id);
+
+    if (!paciente) {
+      return res.status(404).json(errors.id_nao_encontrada)
+    }
+
+    res.status(200).json(paciente);
+  },
+
+
+  //POST 
   async cadastrarPaciente(req, res) {
     const pacienteExists = await Pacientes.findOne({
       where: { email: req.body.email },
@@ -14,7 +40,7 @@ const PacienteController = {
 
     const { nome, email, idade } = req.body;
 
-    if (!nome, !email, !idade ) {
+    if ((!nome || !email || !idade)) {
       return res.status(400).json({
         message:
           "Erro na requisição. Verifique se todas as informações são fornecidas corretamente.",
@@ -30,30 +56,7 @@ const PacienteController = {
   },
 
 
-  
-  listarPacientes: async (req, res) => {
-    const listaDePacientes = await Pacientes.findAll({});
-   
-    res.json(listaDePacientes);
-  },
-
-
-
-  listarPacienteId: async (req, res) => {
-    const { id } = req.params;
-
-    const paciente = await Pacientes.findByPk(id);
-
-    if (paciente == null) {
-      return res.status(404).json({ message: "id invalido!" });
-    }
-
-    res.json(paciente);
-  },
-
-
-
-
+  //PUT 
   async atualizarPacienteId(req, res) {
     const { id } = req.params;
     const { nome, email, idade } = req.body;
@@ -63,13 +66,10 @@ const PacienteController = {
     if (!paciente) {
       return res
         .status(404)
-        .json({ message: "Erro na requisição. Paciente não encontrado!" });
+        .json(errors.id_nao_encontrada);
     }
 
-    if(!nome, !email, !idade) {
-      return res.status(400).json({ error: "Erro na requisicao!" });
-    }
-
+   
     const pacienteAtualizado = await Pacientes.update(
       {
         nome,
@@ -82,13 +82,11 @@ const PacienteController = {
         },
       }
     );
-
-    return res.status(200).json({ nome, email, idade });
+    res.status(200).json(await Pacientes.findByPk(id))
   },
 
 
-
-
+  //DELETAR
   async deletarPaciente(req, res) {
     const { id } = req.params;
 
@@ -97,18 +95,16 @@ const PacienteController = {
     if (!paciente) {
       return res
         .status(404)
-        .json({ message: "Erro na requisição. Paciente não encontrado!" });
-    } 
-    
-
+        .json(errors.id_nao_encontrada);
+    }
 
     await Pacientes.destroy({
       where: {
         id,
       },
+    }).then(()=>{
+      res.status(204).end();
     });
-
-    return res.status(200).json({ message: "Paciente deletado" }); //status 204 nao permite mensagem
   },
 };
 

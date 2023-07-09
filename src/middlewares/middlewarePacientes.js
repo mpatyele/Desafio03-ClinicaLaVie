@@ -1,29 +1,30 @@
-const { validate, Joi } = require("express-validation");
-const Pacientes = require ("../controllers/controllerPacientes.js");
+import { validate, Joi } from "express-validation"
+
 
 const validatePost = validate({
   body: Joi.object({
       nome: Joi.string().required(),
       email: Joi.string().email().required(),
-      nascimento: Joi.date().required(),
+      idade: Joi.date().required(),
     })
   })
 
   const validatePut = validate({
     body: Joi.object({
-        nome: Joi.string().optional(),
-        email: Joi.string().email().optional(),
-        nascimento: Joi.date().optional(),
+        nome: Joi.string().required(),
+        email: Joi.string().email().required(),
+        idade: Joi.date().required(),
       })
     })
 
-  const middewaresPacientes = {
+  const middlewaresPacientes = {
   postPaciente: async (req, res, next) => { 
     await validatePost(req, res, next);  
   },
+  
   putPacienteById: async (req, res, next) => { 
     await validatePut(req, res, next);  
   },
   };
     
-  module.exports = middewaresPacientes;
+ export default middlewaresPacientes;
