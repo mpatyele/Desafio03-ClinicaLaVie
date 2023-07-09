@@ -2,48 +2,47 @@ import { Sequelize } from "sequelize";
 import express from "express";
 import Atendimentos from "../models/Atendimentos.js";
 import Pacientes from "../models/Pacientes.js";
+import errors from "../../core/errors/errors.js";
+
 
 const AtendimentosController = {
-   async cadastrarAtendimento(req, res) {
-    const { paciente_id, data_atendimento, observacao, idPsicologo } = (req.body);
-
-    if (!paciente_id || !data_atendimento || !observacao) {
-      return res.status(400).json({
-        message:
-          "Erro na requisição. Verifique se todas as informações são fornecidas corretamente.",
-      });
-    }
-
-    const pacienteExists = await Atendimentos.findOne({
-      where: { paciente_id },
-    });
-
-    if (!pacienteExists) {
-      return res.status(400).json({
-        message:
-          "Erro na requisição. Verifique se todas as informações são fornecidas corretamente.",
-      });
-    }
-
-    const novoAtendimento = await Atendimentos.create({
-      paciente_id,
-      data_atendimento,
-      observacao,
-      idPsicologo,
-    });
-    return res.status(201).json({
-      paciente_id,
-      data_atendimento,
-      observacao,
-      idPsicologo
-    });
-  },
-
-
+  //GET
   async listarAtendimentos(req, res) {
     const listaDeAtendimentos = await Atendimentos.findAll({});
+    if (listaDeAtendimentos.length === 0) {
+      return res.status(200).json({});
+    }
     return res.status(200).json(listaDeAtendimentos);
   },
+
+  //GET POR ID
+  listarAtendimentoId: async (req,res) => {
+    const { id } = req.params;
+    const atendimento = await Atendimentos.findByPk(id);
+    if (!atendimento) {
+      return res.status(404).json( errors.id_nao_encontrada );
+    }
+    res.json(atendimento);
+  },
+
+  //POST 
+   async cadastrarAtendimento(req, res) {
+    const { id_paciente, data_atendimento, observacao, id_psicologo } = (req.body);
+
+ 
+    const novoAtendimento = await Atendimentos.create({
+      id_paciente,
+      data_atendimento,
+      observacao,
+      id_psicologo,
+    });
+  
+    return res.status(201).json(novoAtendimento);
+  },
+
+  
+
+
 };
 
 export default AtendimentosController;
